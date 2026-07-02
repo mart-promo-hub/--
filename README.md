@@ -1,2 +1,11 @@
-# -Prime-AI
-AI promotion platform for Pi Network Mainnet
+# πPrime AI
+منصة ترويج ذكية تعمل بالذكاء الاصطناعي لشبكة Pi Network Mainnet
+
+## الميزات
+- توليد محتوى بالذكاء الاصطناعي
+- دعم 5 لغات
+- مدفوعات Pi Network
+- تكامل مع منصات التواصل الاجتماعي
+
+## الرابط
+https://primeaibje3330.pinet.com
