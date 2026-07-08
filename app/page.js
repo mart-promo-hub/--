@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 // ==================== البيانات الثابتة ====================
 const INITIAL_CAMPAIGNS = [
@@ -31,13 +31,36 @@ const SimpleChart = ({ data, color, label }) => {
 };
 
 // ==================== التطبيق الرئيسي ====================
-export default function App() {
+export default function Home() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [campaigns, setCampaigns] = useState(INITIAL_CAMPAIGNS);
   const [filter, setFilter] = useState('الكل');
   const [page, setPage] = useState('dashboard');
   const [newCampaign, setNewCampaign] = useState({ name: '', type: 'نص', platform: 'فيسبوك', status: 'نشطة', budget: 100, text: '' });
   const [aiText, setAiText] = useState('');
   const [balance, setBalance] = useState(10);
+
+  // ===== دالة المصادقة مع Pi =====
+  const signInWithPi = async () => {
+    setLoading(true);
+    try {
+      await window.Pi.init({ version: "2.0" });
+      const authResult = await window.Pi.authenticate(['username'], (payment) => {
+        console.log("Payment callback:", payment);
+      });
+      setUser({
+        uid: authResult.user.uid,
+        username: authResult.user.username,
+      });
+      alert("✅ تم تسجيل الدخول بنجاح!");
+    } catch (error) {
+      console.error("Pi auth error:", error);
+      alert("❌ فشل تسجيل الدخول. تأكد من أنك تستخدم Pi Browser.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // ===== دالة توليد النصوص بالذكاء الاصطناعي (محاكاة) =====
   const generateAIText = (campaignName) => {
@@ -86,7 +109,6 @@ export default function App() {
     alert('✅ تم إنشاء الحملة بنجاح!');
   };
 
-  // ===== دالة حذف الحملة =====
   const deleteCampaign = (id) => {
     if (window.confirm('هل أنت متأكد من حذف هذه الحملة؟')) {
       setCampaigns(campaigns.filter(c => c.id !== id));
@@ -94,14 +116,12 @@ export default function App() {
     }
   };
 
-  // ===== دالة عرض النتائج =====
   const showResults = (id) => {
     const c = campaigns.find(c => c.id === id);
     if (!c) return alert('الحملة غير موجودة');
     alert(`📊 نتائج الحملة: ${c.name}\n\n📈 المشاهدات: ${c.impressions.toLocaleString()}\n🖱️ النقرات: ${c.clicks.toLocaleString()}\n📊 CTR: ${c.ctr}%\n❤️ التفاعل: ${c.engagement.toLocaleString()}\n🔄 التحويلات: ${c.conversions}\n💰 العائد (ROI): ${c.roi}%\n💵 الميزانية: ${c.budget} π`);
   };
 
-  // ===== دالة شراء باقة =====
   const buyPackage = (price) => {
     if (balance < price) return alert(`⚠️ رصيدك غير كافٍ! رصيدك الحالي: ${balance} π`);
     if (window.confirm(`هل تريد شراء الباقة بـ ${price} π؟`)) {
@@ -118,7 +138,44 @@ export default function App() {
     completed: campaigns.filter(c => c.status === 'منتهية').length,
   };
 
-  // ===== صفحات التطبيق =====
+  // ===== إذا لم يسجل المستخدم دخوله =====
+  if (!user) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        minHeight: '100vh',
+        background: '#0f0e17',
+        color: '#fffffe',
+        padding: '20px'
+      }}>
+        <h1 style={{ color: '#6c5ce7', marginBottom: '10px' }}>🚀 منصة الترويج الذكي</h1>
+        <p style={{ color: '#a7a9be', marginBottom: '30px' }}>لرواد Pi Network</p>
+        <button 
+          onClick={signInWithPi} 
+          disabled={loading}
+          style={{
+            padding: '14px 32px',
+            fontSize: '18px',
+            background: '#6c5ce7',
+            color: 'white',
+            border: 'none',
+            borderRadius: '12px',
+            cursor: 'pointer',
+            transition: 'all 0.3s',
+            boxShadow: '0 4px 15px rgba(108, 92, 231, 0.4)'
+          }}
+        >
+          {loading ? '⏳ جاري التحميل...' : '🔑 تسجيل الدخول باستخدام Pi'}
+        </button>
+        {loading && <p style={{ color: '#a7a9be', marginTop: '20px' }}>جاري الاتصال بـ Pi Network...</p>}
+      </div>
+    );
+  }
+
+  // ===== صفحات التطبيق (للمستخدمين المسجلين) =====
   const renderPage = () => {
     switch (page) {
       case 'dashboard':
@@ -213,6 +270,9 @@ export default function App() {
           <div>
             <h2>⚙️ الإعدادات</h2>
             <div className="card">
+              <p>👤 المستخدم: <strong>{user.username}</strong></p>
+              <p>🆔 UID: <strong>{user.uid}</strong></p>
+              <hr style={{ borderColor: '#6c5ce7', margin: '16px 0' }} />
               <p>💰 رصيدك الحالي: <strong>{balance} π</strong></p>
               <button onClick={() => setBalance(balance + 5)} style={{ background: '#4ecdc4' }}>➕ إضافة 5 π (تجريبي)</button>
               <hr style={{ borderColor: '#6c5ce7', margin: '16px 0' }} />
@@ -237,8 +297,7 @@ export default function App() {
               <hr style={{ borderColor: '#6c5ce7', margin: '16px 0' }} />
               <p>🔑 المفاتيح: تم حذفها لأسباب أمنية ✅</p>
               <p>🌐 اللغة: العربية (RTL)</p>
-              <p>📱 الحالة: متصل (بدون مفاتيح)</p>
-              <button>💾 حفظ الإعدادات</button>
+              <button onClick={() => setUser(null)} style={{ background: '#ff6b6b' }}>🚪 تسجيل الخروج</button>
             </div>
           </div>
         );
@@ -249,13 +308,12 @@ export default function App() {
             <h2>👨‍💻 تفاصيل المطور</h2>
             <div className="card">
               <p><strong>اسم المطور:</strong> Smart Promo Hub</p>
-              <p><strong>الموقع:</strong> <a href="https://smartprq1318.pinet.com" style={{ color: '#6c5ce7' }}>smartprq1318.pinet.com</a></p>
+              <p><strong>الموقع:</strong> <a href="https://smart-prq1318.pinet.com" style={{ color: '#6c5ce7' }}>smart-prq1318.pinet.com</a></p>
               <p><strong>المستودع:</strong> <a href="https://github.com/mart-promo-hub/smart-promo-hub" style={{ color: '#6c5ce7' }}>GitHub</a></p>
-              <p><strong>سياسة الخصوصية:</strong> <a href="https://github.com/mart-promo-hub/smart-promo-hub/blob/main/PRIVACY_POLICY.md" style={{ color: '#6c5ce7' }}>رابط</a></p>
               <p><strong>البريد الإلكتروني:</strong> ailailhashed2020@gmail.com</p>
               <button onClick={() => navigator.clipboard.writeText('ailailhashed2020@gmail.com')}>📋 نسخ البريد</button>
               <hr style={{ borderColor: '#6c5ce7', margin: '16px 0' }} />
-              <p style={{ color: '#4ecdc4' }}>✅ التطبيق يعمل بدون مفاتيح خارجية</p>
+              <p style={{ color: '#4ecdc4' }}>✅ التطبيق يعمل مع مصادقة Pi</p>
               <p style={{ color: '#a7a9be', fontSize: '14px' }}>تم حذف جميع المفاتيح لأسباب أمنية</p>
             </div>
           </div>
@@ -267,10 +325,10 @@ export default function App() {
   };
 
   return (
-    <div style={{ padding: '16px', maxWidth: '800px', margin: '0 auto' }}>
+    <div style={{ padding: '16px', maxWidth: '800px', margin: '0 auto', background: '#0f0e17', color: '#fffffe', minHeight: '100vh' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
         <h1 style={{ color: '#6c5ce7' }}>🚀 منصة الترويج الذكي</h1>
-        <div style={{ fontSize: '14px', color: '#a7a9be' }}>v2.0 - بدون مفاتيح</div>
+        <div style={{ fontSize: '14px', color: '#a7a9be' }}>👤 {user.username}</div>
       </div>
 
       <nav className="nav-bar">
