@@ -11,77 +11,80 @@ type PiContextType = {
   user: PiUser | null;
   loading: boolean;
   signIn: () => Promise<void>;
+  signOut: () => void;
 };
 
 const PiContext = createContext<PiContextType>({
   user: null,
   loading: true,
   signIn: async () => {},
+  signOut: () => {},
 });
 
 export const PiProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<PiUser | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // تهيئة Pi SDK عند تحميل التطبيق
   useEffect(() => {
     const initPi = async () => {
       try {
-        await (window as any).Pi.init({ version: "2.0" });
-        setLoading(false);
-
-        // Auto sign-in after init
-        await signIn();
-      } catch (e) {
-        console.error("Pi init failed", e);
+        await (window as any).Pi.init({ version: "2.0", sandbox: false });
+        console.log("✅ Pi SDK initialized");
+      } catch (error) {
+        console.error("❌ Pi init failed:", error);
+      } finally {
         setLoading(false);
       }
     };
-
     initPi();
   }, []);
 
-  const validateWithBackend = async (accessToken: string) => {
-    const res = await fetch("https://api.minepi.com/v2/me", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-
-    if (!res.ok) throw new Error("Token validation failed");
-
-    return await res.json();
-  };
-
+  // دالة تسجيل الدخول
   const signIn = async () => {
+    setLoading(true);
     try {
-      const scopes = ["username"];
+      // 1. طلب المصادقة من Pi
+      const auth = await (window as any).Pi.authenticate(
+        ["username"],
+        () => {},
+        () => {}
+      );
 
-      const authResult = await (window as any).Pi.authenticate(scopes, async (payment: any) => {
-        return payment;
-      });
+      if (!auth?.accessToken) {
+        throw new Error("لم يتم الحصول على توكن المصادقة");
+      }
 
-      const accessToken = authResult.accessToken;
-
-      const userData = await validateWithBackend(accessToken);
-
-      setUser({
-        uid: userData.uid,
-        username: userData.username,
-      });
-
-      // optional: send to your backend session endpoint
-      await fetch("/api/auth/pi", {
+      // 2. إرسال التوكن إلى الخادم الخلفي للتحقق
+      const response = await fetch("/api/auth/pi", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ accessToken }),
+        body: JSON.stringify({ accessToken: auth.accessToken }),
       });
-    } catch (err) {
-      console.error("Pi auth failed", err);
+
+      if (!response.ok) {
+        throw new Error("فشل التحقق من التوكن في الخادم");
+      }
+
+      const data = await response.json();
+      setUser(data.user);
+      console.log("✅ تم تسجيل الدخول بنجاح:", data.user);
+    } catch (error) {
+      console.error("❌ فشل تسجيل الدخول:", error);
+      alert("فشل تسجيل الدخول. تأكد من أنك تستخدم Pi Browser.");
+    } finally {
+      setLoading(false);
     }
   };
 
+  // دالة تسجيل الخروج
+  const signOut = () => {
+    setUser(null);
+    console.log("👋 تم تسجيل الخروج");
+  };
+
   return (
-    <PiContext.Provider value={{ user, loading, signIn }}>
+    <PiContext.Provider value={{ user, loading, signIn, signOut }}>
       {children}
     </PiContext.Provider>
   );
