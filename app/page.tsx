@@ -1,22 +1,9 @@
-// app/page.tsx (معدل مع Dashboard)
+// app/page.tsx (نسخة آمنة بدون مكتبات إضافية)
 "use client";
 
 import { usePi } from "@/components/PiProvider";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { 
-  TrendingUp, 
-  Users, 
-  Eye, 
-  MousePointerClick, 
-  PlusCircle, 
-  Calendar,
-  ArrowUpRight,
-  Clock,
-  CheckCircle,
-  BarChart3,
-  Sparkles
-} from "lucide-react";
 
 export default function Home() {
   const { user, loading, error, isPiBrowser, signIn, signOut } = usePi();
@@ -61,9 +48,7 @@ export default function Home() {
       <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md mx-auto">
         <div className="text-center">
           <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <span className="text-4xl">❌</span>
           </div>
           <h2 className="text-2xl font-bold text-gray-800 mb-2">خطأ في المصادقة</h2>
           <p className="text-gray-600 mb-4">{error}</p>
@@ -89,7 +74,7 @@ export default function Home() {
           href="/campaigns/create"
           className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition-all shadow-lg hover:shadow-xl font-medium"
         >
-          <PlusCircle className="w-5 h-5" />
+          <span>➕</span>
           <span>إنشاء حملة جديدة</span>
         </Link>
       </div>
@@ -102,8 +87,8 @@ export default function Home() {
               <p className="text-gray-500 text-sm">إجمالي الحملات</p>
               <p className="text-2xl font-bold text-gray-800 mt-1">{stats.totalCampaigns}</p>
             </div>
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-blue-600" />
+            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-xl">
+              📊
             </div>
           </div>
           <div className="flex gap-2 mt-2 text-xs">
@@ -119,8 +104,8 @@ export default function Home() {
               <p className="text-gray-500 text-sm">إجمالي الوصول</p>
               <p className="text-2xl font-bold text-gray-800 mt-1">{stats.totalReach}</p>
             </div>
-            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-              <Eye className="w-5 h-5 text-purple-600" />
+            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center text-xl">
+              👁️
             </div>
           </div>
           <p className="text-xs text-green-600 mt-2">↑ 12% عن الشهر الماضي</p>
@@ -132,8 +117,8 @@ export default function Home() {
               <p className="text-gray-500 text-sm">إجمالي النقرات</p>
               <p className="text-2xl font-bold text-gray-800 mt-1">{stats.totalClicks}</p>
             </div>
-            <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-              <MousePointerClick className="w-5 h-5 text-orange-600" />
+            <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center text-xl">
+              🖱️
             </div>
           </div>
           <p className="text-xs text-green-600 mt-2">↑ 8% عن الشهر الماضي</p>
@@ -145,8 +130,8 @@ export default function Home() {
               <p className="text-gray-500 text-sm">إجمالي الإنفاق</p>
               <p className="text-2xl font-bold text-gray-800 mt-1">{stats.totalSpent}</p>
             </div>
-            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-              <BarChart3 className="w-5 h-5 text-green-600" />
+            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center text-xl">
+              💰
             </div>
           </div>
           <p className="text-xs text-gray-500 mt-2">ROI: 2.4x</p>
@@ -157,12 +142,12 @@ export default function Home() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div className="flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-blue-600" />
+            <span className="text-xl">📅</span>
             <h2 className="font-semibold text-gray-800">آخر الحملات</h2>
           </div>
           <Link href="/campaigns" className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1">
             عرض الكل
-            <ArrowUpRight className="w-4 h-4" />
+            <span>→</span>
           </Link>
         </div>
         <div className="divide-y divide-gray-100">
@@ -189,8 +174,8 @@ export default function Home() {
                   campaign.status === "مجدولة" ? "bg-yellow-100 text-yellow-700" :
                   "bg-gray-100 text-gray-600"
                 }`}>
-                  {campaign.status === "نشطة" && <CheckCircle className="w-3 h-3 inline ml-1" />}
-                  {campaign.status === "مجدولة" && <Clock className="w-3 h-3 inline ml-1" />}
+                  {campaign.status === "نشطة" && "✅ "}
+                  {campaign.status === "مجدولة" && "⏳ "}
                   {campaign.status}
                 </span>
                 <Link
@@ -198,7 +183,7 @@ export default function Home() {
                   className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1"
                 >
                   عرض النتائج
-                  <ArrowUpRight className="w-4 h-4" />
+                  <span>→</span>
                 </Link>
               </div>
             </div>
@@ -210,7 +195,7 @@ export default function Home() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Link href="/campaigns/create" className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-4 text-white hover:shadow-lg transition-shadow">
           <div className="flex items-center gap-3">
-            <PlusCircle className="w-8 h-8" />
+            <span className="text-2xl">🚀</span>
             <div>
               <p className="font-semibold">إنشاء حملة جديدة</p>
               <p className="text-sm text-blue-100">ابدأ حملتك الإعلانية الآن</p>
@@ -219,7 +204,7 @@ export default function Home() {
         </Link>
         <Link href="/analytics" className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-4 text-white hover:shadow-lg transition-shadow">
           <div className="flex items-center gap-3">
-            <BarChart3 className="w-8 h-8" />
+            <span className="text-2xl">📊</span>
             <div>
               <p className="font-semibold">عرض الإحصائيات</p>
               <p className="text-sm text-purple-100">تحليل أداء حملاتك</p>
@@ -228,7 +213,7 @@ export default function Home() {
         </Link>
         <Link href="/templates" className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-4 text-white hover:shadow-lg transition-shadow">
           <div className="flex items-center gap-3">
-            <Sparkles className="w-8 h-8" />
+            <span className="text-2xl">✨</span>
             <div>
               <p className="font-semibold">قوالب النصوص</p>
               <p className="text-sm text-green-100">استخدم قوالب جاهزة</p>
