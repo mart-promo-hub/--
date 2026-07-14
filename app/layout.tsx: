@@ -1,43 +1,36 @@
-import { NextRequest, NextResponse } from "next/server";
+// app/layout.tsx
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { PiProvider } from "@/components/PiProvider";
 
-export async function POST(request: NextRequest) {
-  try {
-    const { accessToken } = await request.json();
+const inter = Inter({ subsets: ["latin"] });
 
-    if (!accessToken) {
-      return NextResponse.json(
-        { error: "Missing access token" },
-        { status: 400 }
-      );
-    }
+export const metadata: Metadata = {
+  title: "منصة الترويج الذكي - Pi Network",
+  description: "منصة الترويج الذكي لرواد Pi Network",
+};
 
-    const piResponse = await fetch("https://api.minepi.com/v2/me", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-
-    if (!piResponse.ok) {
-      return NextResponse.json(
-        { error: "Invalid Pi access token" },
-        { status: 401 }
-      );
-    }
-
-    const piUser = await piResponse.json();
-
-    return NextResponse.json({
-      success: true,
-      user: {
-        uid: piUser.uid,
-        username: piUser.username,
-      },
-    });
-  } catch (error) {
-    console.error("Auth error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="ar" dir="rtl">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="pi" content="Pi Network App" />
+        <script
+          src="https://sdk.minepi.com/pi-sdk.js"
+          async
+        />
+      </head>
+      <body className={inter.className}>
+        <PiProvider>
+          {children}
+        </PiProvider>
+      </body>
+    </html>
+  );
 }
